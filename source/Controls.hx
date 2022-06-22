@@ -1,11 +1,14 @@
 package;
 
+import flixel.input.gamepad.FlxGamepad;
 import flixel.FlxG;
 import flixel.input.FlxInput;
 import flixel.input.actions.FlxAction;
 import flixel.input.actions.FlxActionInput;
+import flixel.input.actions.FlxActionInputDigital;
 import flixel.input.actions.FlxActionManager;
 import flixel.input.actions.FlxActionSet;
+import flixel.input.gamepad.FlxGamepadButton;
 import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.input.keyboard.FlxKey;
 #if android
@@ -262,7 +265,7 @@ class Controls extends FlxActionSet
 
 		for (action in digitalActions)
 			byName[action.name] = action;
-
+			
 		if (scheme == null)
 			scheme = None;
 		setKeyboardScheme(scheme, false);
@@ -371,6 +374,32 @@ class Controls extends FlxActionSet
 		super.update();
 	}
 
+	// inline
+	public function checkByName(name:Action):Bool
+	{
+		#if debug
+		if (!byName.exists(name))
+			throw 'Invalid name: $name';
+		#end
+		return byName[name].check();
+	}
+
+	public function getDialogueName(action:FlxActionDigital):String
+	{
+		var input = action.inputs[0];
+		return switch input.device
+		{
+			case KEYBOARD: return '[${(input.inputID : FlxKey)}]';
+			case GAMEPAD: return '(${(input.inputID : FlxGamepadInputID)})';
+			case device: throw 'unhandled device: $device';
+		}
+	}
+
+	public function getDialogueNameFromToken(token:String):String
+	{
+		return getDialogueName(getActionFromControl(Control.createByName(token.toUpperCase())));
+	}
+
 	function getActionFromControl(control:Control):FlxActionDigital
 	{
 		return switch (control)
@@ -432,6 +461,27 @@ class Controls extends FlxActionSet
 		}
 	}
 
+	public function replaceBinding(control:Control, device:Device, ?toAdd:Int, ?toRemove:Int)
+	{
+		if (toAdd == toRemove)
+			return;
+
+		switch (device)
+		{
+			case Keys:
+				if (toRemove != null)
+					unbindKeys(control, [toRemove]);
+				if (toAdd != null)
+					bindKeys(control, [toAdd]);
+
+			case Gamepad(id):
+				if (toRemove != null)
+					unbindButtons(control, id, [toRemove]);
+				if (toAdd != null)
+					bindButtons(control, id, [toAdd]);
+		}
+	}
+
 	public function copyFrom(controls:Controls, ?device:Device)
 	{
 		#if (haxe >= "4.0.0")
@@ -478,6 +528,11 @@ class Controls extends FlxActionSet
 		}
 	}
 
+	inline public function copyTo(controls:Controls, ?device:Device)
+	{
+		controls.copyFrom(this, device);
+	}
+
 	function mergeKeyboardScheme(scheme:KeyboardScheme):Void
 	{
 		if (scheme != None)
@@ -505,10 +560,34 @@ class Controls extends FlxActionSet
 		#end
 	}
 
+	/**
+	 * Sets all actions that pertain to the binder to trigger when the supplied keys are used.
+	 * If binder is a literal you can inline this
+	 */
+	public function unbindKeys(control:Control, keys:Array<FlxKey>)
+	{
+		#if (haxe >= "4.0.0")
+		inline forEachBound(control, (action, _) -> removeKeys(action, keys));
+		#else
+		forEachBound(control, function(action, _) removeKeys(action, keys));
+		#end
+	}
+
 	inline static function addKeys(action:FlxActionDigital, keys:Array<FlxKey>, state:FlxInputState)
 	{
 		for (key in keys)
 			action.addKey(key, state);
+	}
+
+	static function removeKeys(action:FlxActionDigital, keys:Array<FlxKey>)
+	{
+		var i = action.inputs.length;
+		while (i-- > 0)
+		{
+			var input = action.inputs[i];
+			if (input.device == KEYBOARD && keys.indexOf(cast input.inputID) != -1)
+				action.remove(input);
+		}
 	}
 
 	public function setKeyboardScheme(scheme:KeyboardScheme, reset = true)
@@ -519,7 +598,7 @@ class Controls extends FlxActionSet
 			removeKeyboard();
 
 		keyboardScheme = scheme;
-
+		
 		#if (haxe >= "4.0.0")
 		switch (scheme)
 		{
@@ -605,8 +684,8 @@ class Controls extends FlxActionSet
 		buttons.set(Control.LEFT,[FlxGamepadInputID.fromString(FlxG.save.data.gpleftBind)]);
 		buttons.set(Control.DOWN,[FlxGamepadInputID.fromString(FlxG.save.data.gpdownBind)]);
 		buttons.set(Control.RIGHT,[FlxGamepadInputID.fromString(FlxG.save.data.gprightBind)]);
-		buttons.set(Control.ACCEPT,[FlxGamepadInputID.START]);
-		buttons.set(Control.BACK,[FlxGamepadInputID.BACK]);
+		buttons.set(Control.ACCEPT,[FlxGamepadInputID.A]);
+		buttons.set(Control.BACK,[FlxGamepadInputID.B]);
 		buttons.set(Control.PAUSE,[FlxGamepadInputID.START]);
 
 		addGamepad(0,buttons);
@@ -641,7 +720,7 @@ class Controls extends FlxActionSet
 			gamepadsAdded.remove(id);
 
 		gamepadsAdded.push(id);
-
+		
 		#if (haxe >= "4.0.0")
 		for (control => buttons in buttonMap)
 			inline bindButtons(control, id, buttons);
@@ -723,10 +802,68 @@ class Controls extends FlxActionSet
 		#end
 	}
 
+	/**
+	 * Sets all actions that pertain to the binder to trigger when the supplied keys are used.
+	 * If binder is a literal you can inline this
+	 */
+	public function unbindButtons(control:Control, gamepadID:Int, buttons)
+	{
+		#if (haxe >= "4.0.0")
+		inline forEachBound(control, (action, _) -> removeButtons(action, gamepadID, buttons));
+		#else
+		forEachBound(control, function(action, _) removeButtons(action, gamepadID, buttons));
+		#end
+	}
+
 	inline static function addButtons(action:FlxActionDigital, buttons:Array<FlxGamepadInputID>, state, id)
 	{
 		for (button in buttons)
 			action.addGamepad(button, state, id);
+	}
+
+	static function removeButtons(action:FlxActionDigital, gamepadID:Int, buttons:Array<FlxGamepadInputID>)
+	{
+		var i = action.inputs.length;
+		while (i-- > 0)
+		{
+			var input = action.inputs[i];
+			if (isGamepad(input, gamepadID) && buttons.indexOf(cast input.inputID) != -1)
+				action.remove(input);
+		}
+	}
+
+	public function getInputsFor(control:Control, device:Device, ?list:Array<Int>):Array<Int>
+	{
+		if (list == null)
+			list = [];
+
+		switch (device)
+		{
+			case Keys:
+				for (input in getActionFromControl(control).inputs)
+				{
+					if (input.device == KEYBOARD)
+						list.push(input.inputID);
+				}
+			case Gamepad(id):
+				for (input in getActionFromControl(control).inputs)
+				{
+					if (input.deviceID == id)
+						list.push(input.inputID);
+				}
+		}
+		return list;
+	}
+
+	public function removeDevice(device:Device)
+	{
+		switch (device)
+		{
+			case Keys:
+				setKeyboardScheme(None);
+			case Gamepad(id):
+				removeGamepad(id);
+		}
 	}
 
 	static function isDevice(input:FlxActionInput, device:Device)
