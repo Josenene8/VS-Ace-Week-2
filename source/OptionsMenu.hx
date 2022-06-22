@@ -27,6 +27,7 @@ class OptionsMenu extends MusicBeatState
 
 	var options:Array<OptionCategory> = [
 		new OptionCategory("Gameplay", [
+			new AndroidControls(),
 			new DFJKOption(controls),
 			new DownscrollOption("Change if the arrows come from the bottom or the top."),
 			new IceNotesOption("Toggle ice notes on certain songs. Turn off for classic gameplay."),
@@ -120,6 +121,9 @@ class OptionsMenu extends MusicBeatState
 		//FlxTween.tween(blackBorder,{y: FlxG.height - 18},2, {ease: FlxEase.elasticInOut});
 
 		super.create();
+                #if android
+                addVirtualPad(FULL, A_B);
+                #end
 
 		changeSelection(0);
 	}
@@ -170,9 +174,9 @@ class OptionsMenu extends MusicBeatState
 				}
 			}
 			
-			if (FlxG.keys.justPressed.UP)
+			if (controls.UP_P)
 				changeSelection(-1);
-			if (FlxG.keys.justPressed.DOWN)
+			if (controls.DOWN_P)
 				changeSelection(1);
 			
 			if (isCat)
