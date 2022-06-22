@@ -1282,7 +1282,9 @@ class PlayState extends MusicBeatState
 		kadeEngineWatermark.cameras = [camHUD];
 		if (loadRep)
 			replayTxt.cameras = [camHUD];
-
+                #if android
+	        addAndroidControls();
+                #end
 		startingSong = true;
 
 		if (isStoryMode)
@@ -1411,7 +1413,9 @@ class PlayState extends MusicBeatState
 	#end
 
 	function startCountdown():Void
-	{
+	{       #if android
+	        androidc.visible = true;
+	        #end
 		inCutscene = false;
 
 		appearStaticArrows();
@@ -3249,14 +3253,7 @@ class PlayState extends MusicBeatState
 
 		endingSong = true;
 
-		if (!loadRep)
-			rep.SaveReplay(saveNotes, saveJudge, replayAna);
-		else
-		{
-			PlayStateChangeables.botPlay = false;
-			PlayStateChangeables.scrollSpeed = 1;
-			PlayStateChangeables.useDownscroll = false;
-		}
+		
 
 		if (FlxG.save.data.fpsCap > 290)
 			(cast(Lib.current.getChildAt(0), Main)).setFPSCap(290);
@@ -3932,7 +3929,7 @@ class PlayState extends MusicBeatState
 			releaseArray = [false, false, false, false];
 		}
 
-		var anas:Array<Ana> = [null, null, null, null];
+		
 
 		// HOLDS, check for sustain notes
 		if (holdArray.contains(true) && generatedMusic)
@@ -3945,12 +3942,7 @@ class PlayState extends MusicBeatState
 			});
 		}
 
-		for (i in 0...pressArray.length)
-			if (pressArray[i])
-				anas[i] = new Ana(Conductor.songPosition, null, false, "miss", i);
-
-		if ((KeyBinds.gamepad && !FlxG.keys.justPressed.ANY))
-		{
+	
 			// PRESSES, check for note hits
 			if (pressArray.contains(true) && generatedMusic)
 			{
@@ -4021,9 +4013,7 @@ class PlayState extends MusicBeatState
 							hit[coolNote.noteData] = true;
 							scoreTxt.color = FlxColor.WHITE;
 							var noteDiff:Float = -(coolNote.strumTime - Conductor.songPosition);
-							anas[coolNote.noteData].hit = true;
-							anas[coolNote.noteData].hitJudge = Ratings.CalculateRating(noteDiff, Math.floor((PlayStateChangeables.safeFrames / 60) * 1000));
-							anas[coolNote.noteData].nearestNote = [coolNote.strumTime, coolNote.noteData, coolNote.sustainLength];
+							 
 							goodNoteHit(coolNote);
 						}
 					}
