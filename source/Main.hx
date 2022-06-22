@@ -62,14 +62,6 @@ class Main extends Sprite
 			gameHeight = Math.ceil(stageHeight / zoom);
 		}
 
-		#if android
-		gameWidth = 1280;
-		gameHeight = 720;
-		zoom = 1;
-		#end
-		game = new FlxGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen);
-		addChild(game);
-
 		#if desktop
 		DiscordClient.initialize();
 
@@ -79,10 +71,16 @@ class Main extends Sprite
 		 
 		#end
 
+		game = new FlxGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen);
+		addChild(game);
+
+		//#if !mobile
 		fpsCounter = new FPS(10, 3, 0xFFFFFF);
 		addChild(fpsCounter);
 		toggleFPS(FlxG.save.data.fps);
+		//#end
 	}
+		
 
 	var game:FlxGame;
 
