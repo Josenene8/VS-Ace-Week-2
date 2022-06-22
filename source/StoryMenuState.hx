@@ -257,7 +257,9 @@ class StoryMenuState extends MusicBeatState
 				item.alpha = 0.6;
 			bullShit++;
 		}
-
+                #if android
+                addVirtualPad(FULL, A_B);
+                #end
 		super.create();
 	}
 
