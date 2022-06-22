@@ -47,6 +47,10 @@ class GameOverSubstate extends MusicBeatSubstate
 		FlxG.camera.target = null;
 
 		bf.playAnim('firstDeath');
+		
+		#if android
+                addVirtualPad(NONE, A_B);
+                #end
 
 		// Count the deaths on songs with ice notes
 		if (FlxG.save.data.specialMechanics && PlayState.SONG.song != 'Concrete-Jungle' && PlayState.SONG.song != 'Ectospasm' && PlayState.SONG.song != 'Groundhog-Day' && !FlxG.save.data.botplay && !PlayState.loadRep)
