@@ -10,7 +10,7 @@ import flixel.math.FlxRect;
 import haxe.xml.Access;
 import lime.utils.Assets;
 
-#if cpp
+#if desktop
 import sys.FileSystem;
 #end
 class FileCache
@@ -34,6 +34,7 @@ class FileCache
     public var loaded = false;
 	public var loadedImages = false;
 
+    #if desktop
     function new()
 	{
 		for (i in FileSystem.readDirectory(FileSystem.absolutePath("assets/songs")))
@@ -48,7 +49,7 @@ class FileCache
             sounds.push(i);
         }
 	}
-
+    #end
     public static function loadFiles()
     {
         instance = new FileCache();
