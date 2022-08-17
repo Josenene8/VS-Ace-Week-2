@@ -34,11 +34,13 @@ class FileCache
     public var loaded = false;
 	public var loadedImages = false;
 
-    #if desktop
+    
     function new()
 	{
+		#if desktop
 		for (i in FileSystem.readDirectory(FileSystem.absolutePath("assets/songs")))
 		{
+		#end
             if(StringTools.endsWith(i, "txt")) continue;
 
 			music.push(i);
