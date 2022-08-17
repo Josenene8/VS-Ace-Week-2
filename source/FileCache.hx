@@ -51,7 +51,7 @@ class FileCache
             sounds.push(i);
         }
 	}
-    #end
+    
     public static function loadFiles()
     {
         instance = new FileCache();
