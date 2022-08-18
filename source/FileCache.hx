@@ -1,4 +1,5 @@
 import haxe.io.Path;
+#if desktop
 import flash.geom.Rectangle;
 import flixel.FlxG;
 import flixel.graphics.FlxGraphic;
@@ -15,7 +16,7 @@ import sys.FileSystem;
 #end
 class FileCache
 {
-    #if desktop
+    
     public static var instance:FileCache;
 
     // so it doesn't brick your computer lol!
