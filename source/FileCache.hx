@@ -15,6 +15,7 @@ import sys.FileSystem;
 #end
 class FileCache
 {
+    #if desktop
     public static var instance:FileCache;
 
     // so it doesn't brick your computer lol!
@@ -37,10 +38,10 @@ class FileCache
     
     function new()
 	{
-		#if desktop
+		
 		for (i in FileSystem.readDirectory(FileSystem.absolutePath("assets/songs")))
 		{
-		#end
+		
             if(StringTools.endsWith(i, "txt")) continue;
 
 			music.push(i);
@@ -265,3 +266,4 @@ class FileCache
 		imageProgress = HelperFunctions.truncateFloat(imagesLoaded / (Lambda.count(sharedSprites) + music.length + sounds.length) * 100, 2);
 	}
 }
+	#end
