@@ -1,5 +1,6 @@
 package;
 
+#if desktop
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
@@ -196,3 +197,4 @@ class DisclaimerState extends FlxState
             }
         }
     }
+#end
