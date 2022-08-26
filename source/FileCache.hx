@@ -11,7 +11,6 @@ import flixel.math.FlxRect;
 import haxe.xml.Access;
 import lime.utils.Assets;
 
-#if deskto
 import sys.FileSystem;
 
 class FileCache
