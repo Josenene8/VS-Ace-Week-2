@@ -267,4 +267,4 @@ class FileCache
 		imageProgress = HelperFunctions.truncateFloat(imagesLoaded / (Lambda.count(sharedSprites) + music.length + sounds.length) * 100, 2);
 	}
 }
-	#end
+	
