@@ -40,7 +40,7 @@ class FileCache
     function new()
 	{
 		
-		for (i in OpenFlAssets.readDirectory(FileSystem.absolutePath("assets/songs")))
+		for (i in FileSystem.readDirectory(FileSystem.absolutePath("assets/songs")))
 		{
 		
             if(StringTools.endsWith(i, "txt")) continue;
@@ -48,7 +48,7 @@ class FileCache
 			music.push(i);
 		}
         
-        for (i in OpenFlAssets.readDirectory(FileSystem.absolutePath("assets/shared/sounds")))
+        for (i in FileSystem.readDirectory(FileSystem.absolutePath("assets/shared/sounds")))
         {
             sounds.push(i);
         }
